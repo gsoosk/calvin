@@ -3,12 +3,16 @@
 # requires: autoconf, libtool, libreadline-dev
 
 sudo apt-get update
-sudo apt install unzip libtool libtool-bin uuid-dev python-is-python3 python2
+sudo apt -y install unzip libtool libtool-bin uuid-dev python-is-python3 python2
 sudo ln -sf /usr/bin/python2 /usr/bin/python # google test ?
 
 rm -rf ext
 mkdir ext
 cd ext
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/calvin/ext/protobuf/src/.libs
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/calvin/ext/zookeeper/.libs
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/calvin/ext/zeromq/src/.libs
 
 #zookeeper
 wget https://archive.apache.org/dist/zookeeper/zookeeper-3.4.6/zookeeper-3.4.6.tar.gz
@@ -43,7 +47,7 @@ cd ..
 
 
 sudo apt-get update
-sudo apt-get install autoconf automake
+sudo apt-get -y install autoconf automake
 
 # zeromq
 git clone https://github.com/zeromq/zeromq2-x.git
@@ -60,8 +64,3 @@ cd ..
 
 
 
-
-
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/calvin/ext/protobuf/src/.libs
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/calvin/ext/zookeeper/.libs
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/calvin/ext/zeromq/src/.libs
