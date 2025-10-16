@@ -104,7 +104,7 @@ int main(int argc, char* argv[]) {
 
   // get a config obj
   Configuration config(-1, config_file);
-  cwd = getcwd(NULL, 0);
+  cwd = strdup("/root/calvin");
 
   FILE* port_fp = fopen(port_file, "r");
   int port_begin;
@@ -209,7 +209,7 @@ void DeployOne(int nodeID,
 
   char copy_config[1024];
   snprintf(copy_config, sizeof(copy_config),
-           "scp -rp deploy-run.conf root@%s:db3/deploy-run.conf",
+           "scp -rp deploy-run.conf root@%s:/root/calvin/deploy-run.conf",
            node->host.c_str());
   system(copy_config);
 
