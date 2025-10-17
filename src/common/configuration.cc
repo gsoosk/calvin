@@ -14,6 +14,7 @@
 #include <string>
 
 #include "common/utils.h"
+#include "applications/tpcc.h"
 
 using std::string;
 
@@ -23,12 +24,84 @@ Configuration::Configuration(int node_id, const string& filename)
     exit(0);
 }
 
-// TODO(alex): Implement better (application-specific?) partitioning.
+// TPCC-aware partitioning based on (X shards per warehouse) and W warehouses.
+// Node layout assumption: nodes are arranged as shard-major blocks of size W.
+// Node id for (warehouse w, shard i) := (i % X) * W + (w % W), then modulo N.
+// Key placement:
+//  - Warehouse and YTD and History: shard i = 0 (warehouse owner shard)
+//  - District/Customer/Order/NewOrder/OrderLine: shard i = district_id % X
+//  - Stock: shard i = item_id % X
+//  - Item: shard i = item_id % X (no warehouse; mapped to shard group 0)
 int Configuration::LookupPartition(const Key& key) const {
-  if (key.find("w") == 0)  // TPCC
-    return OffsetStringToInt(key, 1) % static_cast<int>(all_nodes.size());
-  else
-    return StringToInt(key) % static_cast<int>(all_nodes.size());
+  const int N = static_cast<int>(all_nodes.size());
+  if (N <= 0) return 0;
+  int TOTAL_WAREHOUSES = (int) N / DISTRICTS_PER_WAREHOUSE;
+  // Compute W and X.
+  int W;
+  if (TOTAL_WAREHOUSES > 0) {
+    W = TOTAL_WAREHOUSES;
+  } else {
+    W = WAREHOUSES_PER_NODE * N;
+  }
+  if (W <= 0) W = 1;
+  int X = N / W;
+  if (X <= 0) X = 1;
+
+  // Helpers to parse ints out of key substrings.
+  auto parse_int_from = [](const string& s, size_t start) -> int {
+    size_t i = start;
+    while (i < s.size() && isdigit(s[i])) i++;
+    if (i == start) return 0;
+    return atoi(s.substr(start, i - start).c_str());
+  };
+
+  if (!key.empty() && key[0] == 'w') {
+    // Parse warehouse id after 'w'.
+    int w = 0;
+    {
+      size_t pos_w = 1;
+      w = parse_int_from(key, pos_w);
+      if (w < 0) w = 0;
+    }
+
+    // Look for district id 'd' and item id 'i' in stock keys.
+    int d = -1;
+    int item = -1;
+    size_t pos_d = key.find('d');
+    if (pos_d != string::npos) {
+      d = parse_int_from(key, pos_d + 1);
+    }
+    size_t pos_i = key.find('i');
+    if (pos_i != string::npos) {
+      item = parse_int_from(key, pos_i + 1);
+    }
+
+    int shard = 0;
+    // Stock key includes 's' and 'i'.
+    if (key.find('s') != string::npos && item >= 0) {
+      shard = item % X;
+    } else if (d >= 0) {
+      // District, customer, order/neworder/orderline derive shard from district.
+      shard = d % X;
+    } else {
+      // Warehouse, YTD, history default to shard 0 for this warehouse.
+      shard = 0;
+    }
+
+    int node = ((w % W) * X + (shard % X)) % N;
+    return node;
+  }
+
+  if (!key.empty() && key[0] == 'i') {
+    // Item-only keys: distribute by residue across shards; map to shard group 0.
+    int item = parse_int_from(key, 1);
+    int shard = ((item < 0) ? 0 : (item % X));
+    int node = (shard % X) % N;
+    return node;
+  }
+
+  // Fallback: hash by numeric value modulo N.
+  return StringToInt(key) % N;
 }
 
 bool Configuration::WriteToFile(const string& filename) const {

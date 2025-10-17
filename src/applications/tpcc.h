@@ -13,6 +13,9 @@
 #include "common/configuration.h"
 
 #define WAREHOUSES_PER_NODE 12
+// If TOTAL_WAREHOUSES > 0, initialization will use it instead of
+// (WAREHOUSES_PER_NODE * number_of_nodes).
+#define DIC3 true
 #define DISTRICTS_PER_WAREHOUSE 10
 #define DISTRICTS_PER_NODE (WAREHOUSES_PER_NODE * DISTRICTS_PER_WAREHOUSE)
 #define CUSTOMERS_PER_DISTRICT 3000

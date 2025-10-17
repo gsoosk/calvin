@@ -81,22 +81,26 @@ class TClient : public Client {
     args.SerializeToString(&args_string);
 
     // New order txn
-   int random_txn_type = rand() % 100;
+  //  int random_txn_type = rand() % 100;
     // New order txn
-    if (random_txn_type < 45)  {
-      *txn = tpcc.NewTxn(txn_id, TPCC::NEW_ORDER, args_string, config_);
-    } else if(random_txn_type < 88) {
-      *txn = tpcc.NewTxn(txn_id, TPCC::PAYMENT, args_string, config_);
-    } else if(random_txn_type < 92) {
-      *txn = tpcc.NewTxn(txn_id, TPCC::ORDER_STATUS, args_string, config_);
-      args.set_multipartition(false);
-    } else if(random_txn_type < 96){
-      *txn = tpcc.NewTxn(txn_id, TPCC::DELIVERY, args_string, config_);
-      args.set_multipartition(false);
-    } else {
-      *txn = tpcc.NewTxn(txn_id, TPCC::STOCK_LEVEL, args_string, config_);
-      args.set_multipartition(false);
-    }
+
+    // We only test new order for dic3
+    *txn = tpcc.NewTxn(txn_id, TPCC::NEW_ORDER, args_string, config_);
+
+    // if (random_txn_type < 45)  {
+    //   *txn = tpcc.NewTxn(txn_id, TPCC::NEW_ORDER, args_string, config_);
+    // } else if(random_txn_type < 88) {
+    //   *txn = tpcc.NewTxn(txn_id, TPCC::PAYMENT, args_string, config_);
+    // } else if(random_txn_type < 92) {
+    //   *txn = tpcc.NewTxn(txn_id, TPCC::ORDER_STATUS, args_string, config_);
+    //   args.set_multipartition(false);
+    // } else if(random_txn_type < 96){
+    //   *txn = tpcc.NewTxn(txn_id, TPCC::DELIVERY, args_string, config_);
+    //   args.set_multipartition(false);
+    // } else {
+    //   *txn = tpcc.NewTxn(txn_id, TPCC::STOCK_LEVEL, args_string, config_);
+    //   args.set_multipartition(false);
+    // }
 
   }
 

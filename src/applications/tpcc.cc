@@ -60,7 +60,7 @@ TxnProto* TPCC::NewTxn(int64 txn_id, int txn_type, string args,
   bool invalid;
   Value customer_value;
   std::set<int> items_used;
-
+  int total_warehouses;
   // We set the read and write set based on type
   switch (txn_type) {
     // Initialize
@@ -71,8 +71,11 @@ TxnProto* TPCC::NewTxn(int64 txn_id, int txn_type, string args,
     // New Order
     case NEW_ORDER:
       // First, we pick a local warehouse
-        warehouse_id = (rand() % WAREHOUSES_PER_NODE) * config->all_nodes.size() + config->this_node_id;
-        snprintf(warehouse_key, sizeof(warehouse_key), "w%d",
+        // warehouse_id = (rand() % WAREHOUSES_PER_NODE) * config->all_nodes.size() + config->this_node_id;
+      txn->set_multipartition(true);
+      total_warehouses =  config->all_nodes.size() / DISTRICTS_PER_WAREHOUSE;
+      warehouse_id = rand() % total_warehouses;
+      snprintf(warehouse_key, sizeof(warehouse_key), "w%d",
                  warehouse_id);
 
       txn->add_read_set(warehouse_key);
@@ -102,7 +105,7 @@ TxnProto* TPCC::NewTxn(int64 txn_id, int txn_type, string args,
       }
 
       // We set the length of the read and write set uniformly between 5 and 15
-      order_line_count = (rand() % 11) + 5;
+      order_line_count = 10;
 
       // Let's choose a bad transaction 1% of the time
       invalid = false;
@@ -131,9 +134,7 @@ TxnProto* TPCC::NewTxn(int64 txn_id, int txn_type, string args,
                  "%s", warehouse_key);
 
         // We only do ~1% remote transactions
-        if (mp) {
-          txn->set_multipartition(true);
-
+        if (rand() % 100 < 1) {
           // We loop until we actually get a remote one
           int remote_warehouse_id;
           do {
@@ -893,8 +894,12 @@ int TPCC::DeliveryTransaction(TxnProto* txn, StorageManager* storage) const {
 // The initialize function is executed when an initialize transaction comes
 // through, indicating we should populate the database with fake data
 void TPCC::InitializeStorage(Storage* storage, Configuration* conf) const {
+  // Determine number of warehouses to initialize.
+  int total_warehouses = (DIC3 == true)
+                           ? conf->all_nodes.size() / DISTRICTS_PER_WAREHOUSE
+                           : (int)(WAREHOUSES_PER_NODE * conf->all_nodes.size());
   // We create and write out all of the warehouses
-  for (int i = 0; i < (int)(WAREHOUSES_PER_NODE * conf->all_nodes.size()); i++) {
+  for (int i = 0; i < total_warehouses; i++) {
     // First, we create a key for the warehouse
     char warehouse_key[128], warehouse_key_ytd[128];
     Value* warehouse_value = new Value();
