@@ -6,7 +6,10 @@ fi
 warehouse_number=$1
 
 cd src
-make -j 
+if ! make -j; then
+    echo "Build failed. Exiting."
+    exit 1
+fi
 cd ..
 
 rm -f ~/.ssh/known_hosts

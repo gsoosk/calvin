@@ -133,18 +133,15 @@ TxnProto* TPCC::NewTxn(int64 txn_id, int txn_type, string args,
         snprintf(remote_warehouse_key, sizeof(remote_warehouse_key),
                  "%s", warehouse_key);
 
-        // We only do ~1% remote transactions
-        if (rand() % 100 < 1) {
+        // We only do ~1% remote warehouses
+        if (rand() % 100 < 1 && total_warehouses > 1) {
           // We loop until we actually get a remote one
           int remote_warehouse_id;
           do {
-            remote_warehouse_id = rand() % (WAREHOUSES_PER_NODE *
-                                            config->all_nodes.size());
+            remote_warehouse_id = rand() % total_warehouses;
             snprintf(remote_warehouse_key, sizeof(remote_warehouse_key),
                      "w%d", remote_warehouse_id);
-          } while (config->all_nodes.size() > 1 &&
-                   config->LookupPartition(remote_warehouse_key) !=
-                     remote_node);
+          } while (remote_warehouse_id == warehouse_id);
         }
 
         // Determine if we should add it to read set to avoid duplicates
@@ -905,9 +902,8 @@ void TPCC::InitializeStorage(Storage* storage, Configuration* conf) const {
     Value* warehouse_value = new Value();
     snprintf(warehouse_key, sizeof(warehouse_key), "w%d", i);
     snprintf(warehouse_key_ytd, sizeof(warehouse_key_ytd), "w%dy", i);
-    if (conf->LookupPartition(warehouse_key) != conf->this_node_id) {
-      continue; 
-    }
+
+
     // Next we initialize the object and serialize it
     Warehouse* warehouse = CreateWarehouse(warehouse_key);
     assert(warehouse->SerializeToString(warehouse_value));
