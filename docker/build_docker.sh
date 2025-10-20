@@ -11,6 +11,6 @@ if ! [ -f "${dir}/id_rsa.pub" ]; then
     cp $HOME/.ssh/id_rsa.pub ${dir}/../
 fi
 
-docker build --no-cache -f ${dir}/Dockerfile -t icnode ${dir}/../
+docker build -f ${dir}/Dockerfile -t icnode ${dir}/../
 
 rm -rf ${dir}/../id_rsa.pub
