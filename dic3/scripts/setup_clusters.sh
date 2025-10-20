@@ -24,7 +24,8 @@ touch ${confFile}
 
 # Output header for clarity
 echo "# Node<id>=<replica>:<partition>:<cores>:<host>:<port>" >> ${confFile}
-CORES=16
+AVAILABLE_CORES=90
+CORES=$((AVAILABLE_CORES / (nodes * 10)))
 REPLICA=0  # Single replica
 
 for (( nodeId=0; nodeId<nodes; nodeId++ )); do

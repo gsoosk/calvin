@@ -86,6 +86,14 @@ class Configuration {
   // Tracks the set of current active nodes in the system.
   map<int, Node*> all_nodes;
 
+  // Returns the starting core index allocated to this node on its host.
+  // Nodes that share the same host are assigned disjoint, contiguous ranges
+  // in ascending node_id order. Each node contributes 'cores' to the range size.
+  int ThisNodeCoreStart() const;
+
+  // Returns the number of cores allocated to this node, as specified in config.
+  int ThisNodeCores() const;
+
  private:
   // TODO(alex): Comments.
   void ProcessConfigLine(char key[], char value[]);

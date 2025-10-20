@@ -83,7 +83,7 @@ DeterministicScheduler::DeterministicScheduler(Configuration* conf,
   //pthread_attr_setdetachstate(&attr1, PTHREAD_CREATE_DETACHED);
   
   CPU_ZERO(&cpuset);
-  CPU_SET(7, &cpuset);
+  CPU_SET(rand() % TOTAL_CORES, &cpuset);
   pthread_attr_setaffinity_np(&attr1, sizeof(cpu_set_t), &cpuset);
   pthread_create(&lock_manager_thread_, &attr1, LockManagerThread,
                  reinterpret_cast<void*>(this));
@@ -98,10 +98,11 @@ DeterministicScheduler::DeterministicScheduler(Configuration* conf,
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     CPU_ZERO(&cpuset);
-    if (i == 0 || i == 1)
-      CPU_SET(i, &cpuset);
-    else
-      CPU_SET(i+2, &cpuset);
+    CPU_SET(rand() % TOTAL_CORES, &cpuset);
+    // if (i == 0 || i == 1)
+    //   CPU_SET(i, &cpuset);
+    // else
+    //   CPU_SET(i+2, &cpuset);
     pthread_attr_setaffinity_np(&attr, sizeof(cpu_set_t), &cpuset);
 
     pthread_create(&(threads_[i]), &attr, RunWorkerThread,

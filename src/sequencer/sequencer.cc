@@ -64,10 +64,7 @@ pthread_attr_init(&attr_writer);
 //pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
 CPU_ZERO(&cpuset);
-//CPU_SET(4, &cpuset);
-//CPU_SET(5, &cpuset);
-CPU_SET(6, &cpuset);
-//CPU_SET(7, &cpuset);
+CPU_SET(rand() % TOTAL_CORES, &cpuset);
 pthread_attr_setaffinity_np(&attr_writer, sizeof(cpu_set_t), &cpuset);
 
 
@@ -76,10 +73,7 @@ pthread_attr_setaffinity_np(&attr_writer, sizeof(cpu_set_t), &cpuset);
       reinterpret_cast<void*>(this));
 
 CPU_ZERO(&cpuset);
-//CPU_SET(4, &cpuset);
-//CPU_SET(5, &cpuset);
-//CPU_SET(6, &cpuset);
-CPU_SET(2, &cpuset);
+CPU_SET(rand() % TOTAL_CORES, &cpuset);
 pthread_attr_t attr_reader;
 pthread_attr_init(&attr_reader);
 pthread_attr_setaffinity_np(&attr_reader, sizeof(cpu_set_t), &cpuset);

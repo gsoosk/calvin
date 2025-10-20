@@ -18,6 +18,11 @@
 
 #include "common/types.h"
 
+// Fixed total number of CPU cores available on each host.
+#ifndef TOTAL_CORES
+#define TOTAL_CORES 92
+#endif
+
 using std::string;
 using std::vector;
 using std::tr1::unordered_map;

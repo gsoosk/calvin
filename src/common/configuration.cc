@@ -190,3 +190,27 @@ void Configuration::ProcessConfigLine(char key[], char value[]) {
   }
 }
 
+int Configuration::ThisNodeCoreStart() const {
+  // Compute start index by summing cores of nodes on the same host
+  // with smaller node_id than this_node_id. This creates disjoint
+  // contiguous ranges per host.
+  if (all_nodes.find(this_node_id) == all_nodes.end()) return 0;
+  const Node* self = all_nodes.find(this_node_id)->second;
+  const string& host = self->host;
+  int start = 0;
+  for (map<int, Node*>::const_iterator it = all_nodes.begin();
+       it != all_nodes.end(); ++it) {
+    if (it->first == this_node_id) continue;
+    const Node* other = it->second;
+    if (other->host == host && it->first < this_node_id) {
+      start += other->cores;
+    }
+  }
+  return start;
+}
+
+int Configuration::ThisNodeCores() const {
+  if (all_nodes.find(this_node_id) == all_nodes.end()) return 1;
+  return all_nodes.find(this_node_id)->second->cores;
+}
+
