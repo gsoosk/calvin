@@ -74,7 +74,8 @@ TxnProto* TPCC::NewTxn(int64 txn_id, int txn_type, string args,
         // warehouse_id = (rand() % WAREHOUSES_PER_NODE) * config->all_nodes.size() + config->this_node_id;
       txn->set_multipartition(true);
       total_warehouses =  config->all_nodes.size() / DISTRICTS_PER_WAREHOUSE;
-      warehouse_id = rand() % total_warehouses;
+      // warehouse_id = rand() % total_warehouses; 
+      warehouse_id = config->this_node_id / DISTRICTS_PER_WAREHOUSE; // local warehouse (in the same container)
       snprintf(warehouse_key, sizeof(warehouse_key), "w%d",
                  warehouse_id);
 

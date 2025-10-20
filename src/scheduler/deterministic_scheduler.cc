@@ -252,8 +252,8 @@ void* DeterministicScheduler::LockManagerThread(void* arg) {
         batch_message = GetBatch(batch_number, scheduler->batch_connection_);
 
       // Current batch has remaining txns, grab up to 10.
-      } else if (executing_txns + pending_txns < 2000) {
-
+      // } else if (executing_txns + pending_txns < 2000) {
+      } else {
         for (int i = 0; i < 100; i++) {
           if (batch_offset >= batch_message->data_size()) {
             // Oops we ran out of txns in this batch. Stop adding txns for now.

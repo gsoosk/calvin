@@ -162,6 +162,7 @@ void Sequencer::RunWriter() {
   for (int batch_number = configuration_->this_node_id;
        !deconstructor_invoked_;
        batch_number += configuration_->all_nodes.size()) {
+    // // std::cout << "node " << configuration_->this_node_id << " is sending txns" << std::endl;
     // Begin epoch.
     double epoch_start = GetTime();
     batch.set_batch_number(batch_number);

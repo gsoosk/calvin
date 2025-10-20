@@ -53,7 +53,7 @@ void* Sequencer::RunSequencerReader(void *arg) {
 
 Sequencer::Sequencer(Configuration* conf, Connection* connection,
                      Client* client, Storage* storage)
-    : epoch_duration_(0.01), configuration_(conf), connection_(connection),
+    : epoch_duration_(0.0001), configuration_(conf), connection_(connection),
       client_(client), storage_(storage), deconstructor_invoked_(false) {
   pthread_mutex_init(&mutex_, NULL);
   // Start Sequencer main loops running in background thread.
